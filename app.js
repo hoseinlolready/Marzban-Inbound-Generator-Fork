@@ -30,6 +30,7 @@ createApp({
       navigator.clipboard.writeText(address);
       alert(`Copied ${address} to clipboard!`);
     };
+
     const config = ref({
       tag: "inbound-8080",
       listen: "0.0.0.0",
@@ -180,7 +181,7 @@ createApp({
       serverNames: "example.com,www.example.com",
       privateKey: "YourPvKey",
       publicKey: "YourPubKey",
-      shortIds: "YouShortIds",
+      shortIds: "YourShortIds",
       spiderX: "/",
       fingerprint: "chrome",
     });
@@ -331,15 +332,6 @@ createApp({
         .join("");
       realitySettings.value.shortIds = shortId;
     };
-
-    // const generateKeys = () => {
-    //   const randomIndex = Math.floor(
-    //     Math.random() * keyPairs.value.length
-    //   );
-    //   const selectedPair = keyPairs.value[randomIndex];
-    //   realitySettings.value.privateKey = selectedPair.privateKey;
-    //   realitySettings.value.publicKey = selectedPair.publicKey;
-    // };
 
     const generatedConfig = computed(() => {
       const output = {
@@ -874,6 +866,230 @@ createApp({
       URL.revokeObjectURL(url);
     };
 
+    const importFromClipboard = async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        const importedConfig = JSON.parse(text);
+        updateConfig(importedConfig);
+        alert("Configuration imported from clipboard successfully!");
+      } catch (error) {
+        alert("Failed to import from clipboard: " + error.message);
+      }
+    };
+
+    const importFromFile = (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const importedConfig = JSON.parse(e.target.result);
+          updateConfig(importedConfig);
+          alert("Configuration imported from file successfully!");
+        } catch (error) {
+          alert("Failed to import from file: " + error.message);
+        }
+      };
+      reader.readAsText(file);
+    };
+
+    const updateConfig = (importedConfig) => {
+      // Update general settings
+      config.value.tag = importedConfig.tag || "inbound-8080";
+      config.value.listen = importedConfig.listen || "0.0.0.0";
+      config.value.port = importedConfig.port || 8080;
+      config.value.protocol = importedConfig.protocol || "vless";
+
+      // Update protocol settings
+      if (importedConfig.settings) {
+        config.value.settings = { ...config.value.settings, ...importedConfig.settings };
+        if (config.value.protocol === "dokodemo-door") {
+          config.value.settings.address = importedConfig.settings.address || "127.0.0.1";
+          config.value.settings.port = importedConfig.settings.port || 1080;
+          config.value.settings.network = importedConfig.settings.network || ["tcp", "udp"];
+          config.value.settings.followRedirect = importedConfig.settings.followRedirect || false;
+        }
+        if (importedConfig.settings.fallbacks && canUseFallbacks.value) {
+          isFallbacksEnabled.value = true;
+          fallbacks.value.splice(0, fallbacks.value.length, ...(importedConfig.settings.fallbacks || []));
+        } else {
+          isFallbacksEnabled.value = false;
+          fallbacks.value.splice(0, fallbacks.value.length);
+        }
+      }
+
+      // Update Shadowsocks settings
+      if (config.value.protocol === "shadowsocks" && importedConfig.settings) {
+        shadowsocksSettings.value.method = importedConfig.settings.method || "2022-blake3-aes-256-gcm";
+        shadowsocksSettings.value.password = importedConfig.settings.password || "";
+        shadowsocksSettings.value.network = importedConfig.settings.network || "tcp,udp";
+        shadowsocksSettings.value.ivCheck = importedConfig.settings.ivCheck || false;
+      }
+
+      // Update SOCKS settings
+      if (config.value.protocol === "socks" && importedConfig.settings) {
+        socksSettings.value.auth = importedConfig.settings.auth || "password";
+        socksSettings.value.accounts = importedConfig.settings.accounts || [{ user: "username1", pass: "password1" }];
+        socksSettings.value.udp = importedConfig.settings.udp || false;
+        socksSettings.value.ip = importedConfig.settings.ip || "127.0.0.1";
+      }
+
+      // Update HTTP settings
+      if (config.value.protocol === "http" && importedConfig.settings) {
+        httpProtocolSettings.value.accounts = importedConfig.settings.accounts || [{ user: "Enterusername1", pass: "pass1" }];
+        httpProtocolSettings.value.allowTransparent = importedConfig.settings.allowTransparent || false;
+      }
+
+      // Update WireGuard settings
+      if (config.value.protocol === "wireguard" && importedConfig.settings) {
+        wireguardSettings.value.mtu = importedConfig.settings.mtu || 1420;
+        wireguardSettings.value.secretKey = importedConfig.settings.secretKey || "";
+        wireguardSettings.value.peers = importedConfig.settings.peers || [
+          {
+            privateKey: "",
+            publicKey: "",
+            preSharedKey: "",
+            allowedIPsInput: "",
+            allowedIPs: [],
+            keepAlive: 0,
+          },
+        ];
+        wireguardSettings.value.noKernelTun = importedConfig.settings.noKernelTun || false;
+      }
+
+      // Update Stream Settings
+      if (importedConfig.streamSettings) {
+        config.value.streamSettings = {
+          network: importedConfig.streamSettings.network || "tcp",
+          security: importedConfig.streamSettings.security || "none",
+        };
+
+        // TCP Settings
+        if (importedConfig.streamSettings.tcpSettings) {
+          tcpSettings.value.acceptProxyProtocol = importedConfig.streamSettings.tcpSettings.acceptProxyProtocol || false;
+          if (importedConfig.streamSettings.tcpSettings.header?.type === "http") {
+            isHttpObfuscationEnabled.value = true;
+            tcpSettings.value.header = importedConfig.streamSettings.tcpSettings.header;
+            requestPath.value = tcpSettings.value.header.request.path?.join(",") || "/path";
+            requestHeaders.value.splice(
+              0,
+              requestHeaders.value.length,
+              ...(Object.entries(tcpSettings.value.header.request.headers || {}).map(([name, value]) => ({
+                name,
+                value: value.join(","),
+              })))
+            );
+            responseHeaders.value.splice(
+              0,
+              responseHeaders.value.length,
+              ...(Object.entries(tcpSettings.value.header.response.headers || {}).map(([name, value]) => ({
+                name,
+                value: value.join(","),
+              })))
+            );
+          } else {
+            isHttpObfuscationEnabled.value = false;
+            requestPath.value = "/path";
+            requestHeaders.value.splice(0, requestHeaders.value.length);
+            responseHeaders.value.splice(0, responseHeaders.value.length);
+          }
+        }
+
+        // WebSocket Settings
+        if (importedConfig.streamSettings.wsSettings) {
+          wsSettings.value = importedConfig.streamSettings.wsSettings;
+          wsHeaders.value.splice(
+            0,
+            wsHeaders.value.length,
+            ...(Object.entries(wsSettings.value.headers || {}).map(([name, value]) => ({ name, value })))
+          );
+        }
+
+        // HTTP Upgrade Settings
+        if (importedConfig.streamSettings.httpupgradeSettings) {
+          httpupgradeSettings.value = importedConfig.streamSettings.httpupgradeSettings;
+          httpupgradeHeaders.value.splice(
+            0,
+            httpupgradeHeaders.value.length,
+            ...(Object.entries(httpupgradeSettings.value.headers || {}).map(([name, value]) => ({ name, value })))
+          );
+        }
+
+        // SplitHTTP Settings
+        if (importedConfig.streamSettings.splithttpSettings) {
+          splithttpSettings.value = importedConfig.streamSettings.splithttpSettings;
+          splithttpHeaders.value.splice(
+            0,
+            splithttpHeaders.value.length,
+            ...(Object.entries(splithttpSettings.value.headers || {}).map(([name, value]) => ({ name, value })))
+          );
+        }
+
+        // XHTTP Settings
+        if (importedConfig.streamSettings.xhttpSettings) {
+          xhttpSettings.value = importedConfig.streamSettings.xhttpSettings;
+          xhttpHeaders.value.splice(
+            0,
+            xhttpHeaders.value.length,
+            ...(Object.entries(xhttpSettings.value.headers || {}).map(([name, value]) => ({ name, value })))
+          );
+        }
+
+        // gRPC Settings
+        if (importedConfig.streamSettings.grpcSettings) {
+          grpcSettings.value = importedConfig.streamSettings.grpcSettings;
+        }
+
+        // HTTP Settings
+        if (importedConfig.streamSettings.httpSettings) {
+          httpSettings.value.path = importedConfig.streamSettings.httpSettings.path || "/yourpath";
+          httpSettings.value.hostInput = importedConfig.streamSettings.httpSettings.host?.join(",") || "example1.com, example2.com";
+        }
+
+        // KCP Settings
+        if (importedConfig.streamSettings.kcpSettings) {
+          kcpSettings.value = importedConfig.streamSettings.kcpSettings;
+        }
+
+        // TLS Settings
+        if (importedConfig.streamSettings.tlsSettings) {
+          tlsSettings.value = {
+            ...tlsSettings.value,
+            ...importedConfig.streamSettings.tlsSettings,
+            alpn: {
+              h3: importedConfig.streamSettings.tlsSettings.alpn?.includes("h3") || false,
+              h2: importedConfig.streamSettings.tlsSettings.alpn?.includes("h2") || false,
+              http11: importedConfig.streamSettings.tlsSettings.alpn?.includes("http/1.1") || false,
+            },
+          };
+        }
+
+        // Reality Settings
+        if (importedConfig.streamSettings.realitySettings) {
+          realitySettings.value = {
+            ...realitySettings.value,
+            ...importedConfig.streamSettings.realitySettings,
+            serverNames: importedConfig.streamSettings.realitySettings.serverNames?.join(",") || "example.com,www.example.com",
+            shortIds: importedConfig.streamSettings.realitySettings.shortIds?.join(",") || "YourShortIds",
+          };
+        }
+      }
+
+      // Update Sniffing Settings
+      if (importedConfig.sniffing) {
+        sniffingEnabled.value = importedConfig.sniffing.enabled || false;
+        sniffingMetadataOnly.value = importedConfig.sniffing.metadataOnly || false;
+        sniffingRouteOnly.value = importedConfig.sniffing.routeOnly || false;
+        destOverride.value = {
+          http: importedConfig.sniffing.destOverride?.includes("http") || false,
+          tls: importedConfig.sniffing.destOverride?.includes("tls") || false,
+          quic: importedConfig.sniffing.destOverride?.includes("quic") || false,
+          fakedns: importedConfig.sniffing.destOverride?.includes("fakedns") || false,
+        };
+      }
+    };
+
     return {
       config,
       availableSecurityOptions,
@@ -937,6 +1153,8 @@ createApp({
       generateRandomPort,
       wallets,
       copyWalletAddress,
+      importFromClipboard,
+      importFromFile,
     };
   },
 }).mount("#app");
