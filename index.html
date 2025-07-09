@@ -2058,7 +2058,7 @@
           >
         {{ generatedConfig }}</pre
           >
-          <div class="flex gap-4 mt-4">
+          <div class="flex gap-4 mt-4 flex-wrap">
             <button
               @click="copyToClipboard"
               class="bg-purple-500 px-4 py-2 rounded-lg hover:bg-purple-600 transition-colors text-sm flex items-center gap-2"
@@ -2099,119 +2099,162 @@
               </svg>
               Download JSON
             </button>
+            <button
+              @click="importFromClipboard"
+              class="bg-blue-500 px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors text-sm flex items-center gap-2"
+            >
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                ></path>
+              </svg>
+              Import from Clipboard
+            </button>
+            <label
+              class="bg-sky-600 px-4 py-2 rounded-lg hover:bg-sky-00 transition-colors text-sm flex items-center gap-2 cursor-pointer"
+            >
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                ></path>
+              </svg>
+              Import from File
+              <input
+                type="file"
+                accept=".json"
+                @change="importFromFile"
+                class="hidden"
+              />
+            </label>
           </div>
 
-          <!-- اسپانسر -->
+<div class="mt-6 pt-6 border-t border-gray-700">
+      <h3 class="text-xl font-semibold text-purple-400 mb-3 text-left" dir="ltr">Sponsored Content</h3>
+  <!-- اسپانسر -->
+  <div id="sponsor-content" class="bg-gray-800 text-white p-6 rounded-lg shadow-lg max-w-md mx-auto mt-6 font-vazir" dir="rtl">
 
-          <!-- بخش دونیت و شبکه‌های اجتماعی -->
-          <div class="mt-6 pt-6 border-t border-gray-700">
-            <h3 class="text-xl font-semibold text-purple-400 mb-3">
-              Support Us with a Donation
-            </h3>
-            <p class="text-sm text-gray-300 mb-4">
-              If you enjoy this tool, with a small donut you can give us a cup
-              of coffee and motivate us to get better! ☕❤️
-            </p>
-
-            <!-- آدرس‌های کیف پول -->
-            <div class="space-y-3">
-              <div
-                v-for="(wallet, index) in wallets"
-                :key="index"
-                class="flex items-center gap-2"
-              >
-                <div class="flex-1">
-                  <label class="text-xs text-gray-400">{{ wallet.name }}</label>
-                  <input
-                    :value="wallet.address"
-                    type="text"
-                    readonly
-                    class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 text-gray-200 text-xs truncate"
-                  />
-                </div>
-                <button
-                  @click="copyWalletAddress(wallet.address)"
-                  class="bg-purple-500 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-purple-600 transition-colors"
-                  title="Copy Address"
-                >
-                  <svg
-                    class="w-4 h-4 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                    ></path>
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            <!-- دکمه‌های شبکه‌های اجتماعی -->
-            <div class="mt-4 flex flex-wrap gap-2">
-              <a
-                href="https://github.com/azavaxhuman/"
-                target="_blank"
-                class="bg-gray-700 px-3 py-1 rounded-lg hover:bg-gray-600 transition-colors text-sm text-gray-200 flex items-center gap-1"
-              >
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
-                  ></path>
-                </svg>
-                GitHub
-              </a>
-              <a
-                href="https://youtube.com/@dailydigitalskills"
-                target="_blank"
-                class="bg-red-600 px-3 py-1 rounded-lg hover:bg-red-700 transition-colors text-sm text-white flex items-center gap-1"
-              >
-                <svg
-                  class="w-4 h-4"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M23.5 6.2a3 3 0 00-2.1-2.1C19.4 3.5 12 3.5 12 3.5s-7.4 0-9.4.6a3 3 0 00-2.1 2.1C0 8.1 0 12 0 12s0 3.9.6 5.8a3 3 0 002.1 2.1c2 .6 9.4.6 9.4.6s7.4 0 9.4-.6a3 3 0 002.1-2.1c.6-1.9.6-5.8.6-5.8s0-3.9-.6-5.8zM9.8 15.5V8.5l6.2 3.5-6.2 3.5z"
-                  ></path>
-                </svg>
-                YouTube
-              </a>
-              <a
-                href="https://t.me/dailydigitalskills"
-                target="_blank"
-                class="bg-blue-500 px-3 py-1 rounded-lg hover:bg-blue-600 transition-colors text-sm text-white flex items-center gap-1"
-              >
-                <svg
-                  class="w-4 h-4"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.587 5.82l-1.85 8.73c-.13.614-.497.765-.84.48l-2.73-2.01-1.32 1.275c-.146.14-.27.256-.556.256l.195-2.79 5.07-4.586c.223-.2-.05-.313-.343-.11L8.73 10.65l-2.626-.81c-.59-.182-.603-.59.123-.885l10.23-3.94c.492-.19.925.11.856.805z"
-                  ></path>
-                </svg>
-                Telegram
-              </a>
-            </div>
-          </div>
+    <img src="https://i.ibb.co/whvXKy4z/photo-2025-07-09-11-48-19.jpg" alt="Sponsor Banner" class="max-w-64 mx-auto h-auto rounded-md mb-4" />
+    <h2 class="text-l font-bold mb-4 text-center">🌟 نمایندگی پنل مرزبان</h2>
+    <ul class="text-sm list-disc list-inside mb-4 space-y-2 text-right">
+      <li>⚡️ پنل مجهز با کانفیگ‌های متنوع تک‌لوکیشن 🇩🇪</li>
+      <li>✅ مناسب برای همه اپراتورها 🟢🟣</li>
+      <li>📱 سازگار با همه دستگاه‌ها 🍎🤖</li>
+      <li>🚀 بدون قطعی و افت سرعت</li>
+      <li>🌐 آی‌پی ثابت، تمیز و بدون نشتی</li>
+      <li>🏪 پشتیبانی کامل و حرفه‌ای</li>
+    </ul>
+    <p class="text-sm mb-2 text-right">🔥 فقط روی فروش تمرکز کن! 🚀</p>
+    <p class="text-sm text-yellow-300 mb-4 text-right">⚠️ سفارش فقط برای فروش بالای ۳ ترابایت ماهانه پذیرفته می‌شود.</p>
+    <div class="text-center">
+      <a
+        href="https://t.me/OpVPNsupport"
+        target="_blank"
+        class="inline-block bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+      >
+        🛒 برای خرید کلیک کنید
+      </a>
+    </div>
+    <p class="text-sm mt-4 text-center">
+      <a href="https://t.me/EasyTunnel1" target="_blank" class="text-blue-300 hover:underline">EasyTunnel1</a> | 
+      <a href="https://t.me/OpVPNsupport" target="_blank" class="text-blue-300 hover:underline">پشتیبانی ✔️</a>
+    </p>
+  </div>
+  <!-- بخش دونیت و شبکه‌های اجتماعی -->
+  <div class="mt-6 pt-6 border-t border-gray-700">
+    <h3 class="text-xl font-semibold text-purple-400 mb-3" dir="ltr">Support Us with a Donation</h3>
+    <p class="text-sm text-gray-300 mb-4">
+      If you enjoy this tool, with a small donation you can give us a cup of coffee and motivate us to get better! ☕❤️
+    </p>
+    <!-- آدرس‌های کیف پول -->
+    <div class="space-y-3">
+      <div v-for="(wallet, index) in wallets" :key="index" class="flex items-center gap-2">
+        <div class="flex-1">
+          <label class="text-xs text-gray-400">{{ wallet.name }}</label>
+          <input
+            :value="wallet.address"
+            type="text"
+            readonly
+            class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 text-gray-200 text-xs truncate"
+          />
         </div>
+        <button
+          @click="copyWalletAddress(wallet.address)"
+          class="bg-purple-500 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-purple-600 transition-colors"
+          title="Copy Address"
+        >
+          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+            ></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <!-- دکمه‌های شبکه‌های اجتماعی -->
+    <div class="mt-4 flex flex-wrap gap-2">
+      <a
+        href="https://github.com/azavaxhuman/"
+        target="_blank"
+        class="bg-gray-700 px-3 py-1 rounded-lg hover:bg-gray-600 transition-colors text-sm text-gray-200 flex items-center gap-1"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
+          ></path>
+        </svg>
+        GitHub
+      </a>
+      <a
+        href="https://youtube.com/@dailydigitalskills"
+        target="_blank"
+        class="bg-red-600 px-3 py-1 rounded-lg hover:bg-red-700 transition-colors text-sm text-white flex items-center gap-1"
+      >
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M23.5 6.2a3 3 0 00-2.1-2.1C19.4 3.5 12 3.5 12 3.5s-7.4 0-9.4.6a3 3 0 00-2.1 2.1C0 8.1 0 12 0 12s0 3.9.6 5.8a3 3 0 002.1 2.1c2 .6 9.4.6 9.4.6s7.4 0 9.4-.6a3 3 0 002.1-2.1c.6-1.9.6-5.8.6-5.8s0-3.9-.6-5.8zM9.8 15.5V8.5l6.2 3.5-6.2 3.5z"
+          ></path>
+        </svg>
+        YouTube
+      </a>
+      <a
+        href="https://t.me/dailydigitalskills"
+        target="_blank"
+        class="bg-blue-500 px-3 py-1 rounded-lg hover:bg-blue-600 transition-colors text-sm text-white flex items-center gap-1"
+      >
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.587 5.82l-1.85 8.73c-.13.614-.497.765-.84.48l-2.73-2.01-1.32 1.275c-.146.14-.27.256-.556.256l.195-2.79 5.07-4.586c.223-.2-.05-.313-.343-.11L8.73 10.65l-2.626-.81c-.59-.182-.603-.59.123-.885l10.23-3.94c.492-.19.925.11.856.805z"
+          ></path>
+        </svg>
+        Telegram
+      </a>
+    </div>
+  </div>
+</div>
       </div>
     </div>
 
